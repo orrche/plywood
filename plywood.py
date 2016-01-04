@@ -46,12 +46,6 @@ class Plywood:
 
 		self.solid = translate([-self.width/2, -self.height/2, 0])
 
-	def __str__(self):
-		print "Plywood..."
-
-	def cutby(self, plywood):
-		self.joinedPlywood += [plywood]
-
 	def addCutSides(self, cut):
 		self._addCutSides(cut)
 		if( cut.cutter == self ):
@@ -61,36 +55,6 @@ class Plywood:
 	
 	def _addCutSides(self, cut):
 		self.cuts += [cut]
-
-	def vaneCutter(self, length, material, count, edge, offset=0.0):
-		margin = 0.03
-		jump = 0
-		step = (length - offset) / (count*2.0-1)
-
-		cutters = union()
-		for i in range(count-edge):
-			if ( edge == 0 ):
-				cutters.add(translate([jump*(step-offset) + i * (step+offset) - margin, -0.005, -0.005]) (cube([step+margin*2 + offset, material + 0.01, material+0.01])))
-				jump = i+1
-			else:
-				jump = i+1
-				cutters.add(translate([jump*(step+offset) + i * (step-offset) - margin, -0.005, -0.005]) (cube([step+margin*2 - offset, material+0.01, material+0.01])))
-
-		return cutters
-
-	def getCutters(self):
-		ret = union()
-		cuts = 3
-		ret.add(translate([-self.width/2, -self.height/2,0])(self.vaneCutter(self.width, self.materialsize, cuts, 1)))
-		ret.add(translate([-self.width/2, self.height/2 - self.materialsize,0])(self.vaneCutter(self.width, self.materialsize, cuts, 1)))
-		ret.add(translate([-self.width/2 + self.materialsize, -self.height/2,0])(
-			rotate(v=[0,0,1],a=90)(self.vaneCutter(self.height, self.materialsize, 2, 1)))
-		)
-		ret.add(translate([self.width/2, -self.height/2,0])(
-			rotate(v=[0,0,1],a=90)(self.vaneCutter(self.height, self.materialsize, 2, 0)))
-		)
-
-		return ret;
 
 	def sideTranslation(self, cut, cutters):
 		if ( cut.side == 0 ):
@@ -114,7 +78,6 @@ class Plywood:
 			tcut = cut.cutter.sideTranslation(cut, cut.cutters(edge))
 			if ( tcut != None ):
 				self.cube.add(tcut)
-		pass
 
 	def getSolid(self):
 		self.cube = difference()(cube([self.width, self.height, self.materialsize]))
