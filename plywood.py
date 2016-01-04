@@ -2,18 +2,19 @@ from solid import *
 
 
 class Join:
-	def __init__(self, cutter_plywood, cuts_plywood, offset = 0, cuts = 3, edge=0, side=0):
+	def __init__(self, cutter_plywood, cuts_plywood, side, offset = 0.0, cuts = 3, edge=0):
 		self.cutter = cutter_plywood
 		self.cuts = cuts_plywood
 		self.offset = offset
 		self.cuts = cuts
 		self.edge = edge
+		self.side = side
 
-	def cutters(self, edge, offset=0.0):
-		if ( side%2 == 0 ):
+	def cutters(self, edge):
+		if ( self.side%2 == 0 ):
 			length = self.cutter.width
 		else:
-			lenght = self.cutter.height
+			length = self.cutter.height
 
 
 		margin = 0.03
@@ -42,7 +43,8 @@ class Plywood:
 		self.materialsize = float(materialsize)
 		self.joinedPlywood = []
 		self.cuts = []
-		self.move = union()
+
+		self.solid = translate([-self.width/2, -self.height/2, 0])
 
 	def __str__(self):
 		print "Plywood..."
@@ -90,10 +92,32 @@ class Plywood:
 
 		return ret;
 
+	def sideTranslation(self, cut, cutters):
+		if ( cut.side == 0 ):
+			return translate([0, self.height - self.materialsize, 0])(cutters)
+		if ( cut.side == 1 ):
+			return translate([self.width, 0, 0])(rotate(v=[0,0,1], a=90)(cutters))
+		if ( cut.side == 2 ):
+			return translate([0, 0, 0])(cutters)
+		if ( cut.side == 3 ):
+			return translate([0 + self.materialsize, 0, 0])(rotate(v=[0,0,1], a=90)(cutters))
+
+		return None
+
+	def updateCuts(self):
+		for cut in self.cuts:
+			if cut.cutter == self:
+				edge = 1 - cut.edge
+			else:
+				edge = cut.edge
+
+			tcut = cut.cutter.sideTranslation(cut, cut.cutters(edge))
+			if ( tcut != None ):
+				self.cube.add(tcut)
+		pass
+
 	def getSolid(self):
-		ret = translate([-self.width/2, -self.height/2, 0])(
-			cube([self.width, self.height, self.materialsize])
-		)
-		for plywood in self.joinedPlywood:
-			ret -= plywood.getCutters()
-		return ret
+		self.cube = difference()(cube([self.width, self.height, self.materialsize]))
+		self.solid.add(self.cube)
+
+		return self.solid
