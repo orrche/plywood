@@ -75,9 +75,33 @@ class Plywood:
 			else:
 				edge = cut.edge
 
-			tcut = cut.cutter.sideTranslation(cut, cut.cutters(edge))
-			if ( tcut != None ):
-				self.cube.add(tcut)
+			cutters = cut.cutter.sideTranslation(cut, cut.cutters(edge))
+			if ( cut.cutter != self ):
+				heap = []
+				obj = cut.cutter.cube.parent
+				while ( obj != None ):
+					heap = heap + [obj]
+					obj = obj.parent
+
+				for obj in heap:
+					if isinstance(obj, translate):
+						cutters = translate(obj.params['v'])(cutters)
+					if isinstance(obj, rotate):
+						cutters = rotate(v = obj.params['v'], a = obj.params['a'])(cutters)
+
+				obj = self.cube.parent
+				heap = []
+				while ( obj != None ):
+					heap = [obj] + heap
+					obj = obj.parent
+				for obj in heap:
+					if isinstance(obj, translate):
+						cutters = translate([-obj.params['v'][0], -obj.params['v'][1], -obj.params['v'][2]])(cutters)
+					if isinstance(obj, rotate):
+						cutters = rotate(v=obj.params['v'], a=-obj.params['a'])(cutters)
+					obj = obj.parent
+
+			self.cube.add(cutters)
 
 	def getSolid(self):
 		self.cube = difference()(cube([self.width, self.height, self.materialsize]))
