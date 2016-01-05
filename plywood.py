@@ -43,6 +43,7 @@ class Plywood:
 		self.materialsize = float(materialsize)
 		self.joinedPlywood = []
 		self.cuts = []
+		self.cube = None
 
 		self.solid = translate([-self.width/2, -self.height/2, 0])
 
@@ -104,6 +105,8 @@ class Plywood:
 			self.cube.add(cutters)
 
 	def getSolid(self):
+		if ( self.cube != None ):
+			return self.cube
 		self.cube = difference()(cube([self.width, self.height, self.materialsize]))
 		self.solid.add(self.cube)
 
