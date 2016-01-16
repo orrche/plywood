@@ -2,7 +2,7 @@ from solid import *
 
 
 class Join:
-	def __init__(self, cutter_plywood, cuts_plywood, side, offset = 0.0, cuts = 3, edge=0):
+	def __init__(self, cutter_plywood, cuts_plywood, side, offset = 0.0, cuts = -1, edge=0):
 		self.cutter = cutter_plywood
 		self.cuts = cuts_plywood
 		self.offset = offset
@@ -17,6 +17,10 @@ class Join:
 		else:
 			length = self.cutter.height
 
+		if ( self.cuts == -1 ):
+			self.cuts = int(2 * length / 60)
+			if ( self.cuts < 2 ):
+				self.cuts = 2
 
 		margin = 0.03
 		jump = 0
