@@ -9,7 +9,7 @@ class Join:
 		self.cuts = cuts
 		self.edge = edge
 		self.side = side
-		self.radius = 2
+		self.radius = 2.0005
 	
 		if ( self.side%2 == 0 ):
 			length = self.cutter.width
@@ -27,10 +27,16 @@ class Join:
 		else:
 			length = self.cutter.height
 
-		margin = 0.03
+		margin = 0.0
 		jump = 0
 		step = (length - self.offset) / (self.cuts*2.0-1)
 		radius = self.radius + margin
+
+		i_cutv1 = radius
+		i_cutv2 = self.cutter.materialsize + 0.01
+		if ( self.edge == 1 ):
+			i_cutv2 = radius
+			i_cutv1 = self.cutter.materialsize + 0.01
 
 		cutters = union()
 		for i in range(self.cuts-edge):
@@ -39,20 +45,20 @@ class Join:
 				cuttings = translate([jump*(step-self.offset) + i * (step+self.offset) - margin, -0.005, -0.005])
 				cuttings.add(cube([step+margin*2 + self.offset, self.cutter.materialsize + 0.01, self.cutter.materialsize+0.01]))
 				if ( i > 0 ):
-					cuttings.add(translate([0, 0, -radius/2])(cube([radius, self.cutter.materialsize+0.01,radius])))
-					cuttings.add(translate([0, 0, self.cutter.materialsize-radius/2])(cube([radius, self.cutter.materialsize+0.01,radius])))
+					cuttings.add(translate([0, self.edge*-radius/2, (1-self.edge) * -radius/2])(cube([radius, i_cutv2,i_cutv1])))
+					cuttings.add(translate([0, self.edge*(self.cutter.materialsize-radius/2), (1-self.edge)*(self.cutter.materialsize-radius/2)])(cube([radius, i_cutv2,i_cutv1])))
 				if ( i+1 < self.cuts-edge):
-					cuttings.add(translate([step+margin*2 + self.offset - radius, 0, -radius/2])(cube([radius, self.cutter.materialsize+0.01,radius])))
-					cuttings.add(translate([step+margin*2 + self.offset - radius, 0, self.cutter.materialsize-radius/2])(cube([radius, self.cutter.materialsize+0.01,radius])))
+					cuttings.add(translate([step+margin*2 + self.offset - radius, self.edge*-radius/2, (1-self.edge)*-radius/2])(cube([radius, i_cutv2,i_cutv1])))
+					cuttings.add(translate([step+margin*2 + self.offset - radius, self.edge*(self.cutter.materialsize-radius/2), (1-self.edge)*(self.cutter.materialsize-radius/2)])(cube([radius, i_cutv2,i_cutv1])))
 				cutters.add(cuttings)
 			else:
 				jump = i+1
 				cuttings = translate([jump*(step+self.offset) + i * (step-self.offset) - margin, -0.005, -0.005])
 				cuttings.add(cube([step+margin*2 - self.offset, self.cutter.materialsize+0.01, self.cutter.materialsize+0.01]))
-				cuttings.add(translate([0, -radius/2, 0])(cube([radius, radius, self.cutter.materialsize+0.01])))
-				cuttings.add(translate([0, self.cutter.materialsize-radius/2,0])(cube([radius, radius, self.cutter.materialsize+0.01])))
-				cuttings.add(translate([step+margin*2 + self.offset - radius, -radius/2, 0])(cube([radius, radius, self.cutter.materialsize+0.01])))
-				cuttings.add(translate([step+margin*2 + self.offset - radius, self.cutter.materialsize-radius/2, 0])(cube([radius, radius, self.cutter.materialsize+0.01])))
+				cuttings.add(translate([0, (1-self.edge)*-radius/2, self.edge * -radius/2])(cube([radius, i_cutv1, i_cutv2])))
+				cuttings.add(translate([0, (1-self.edge)*(self.cutter.materialsize-radius/2),self.edge*(self.cutter.materialsize-radius/2)])(cube([radius, i_cutv1, i_cutv2])))
+				cuttings.add(translate([step+margin*2 - self.offset - radius, (1-self.edge)*-radius/2, self.edge*-radius/2])(cube([radius, i_cutv1, i_cutv2])))
+				cuttings.add(translate([step+margin*2 - self.offset - radius, (1-self.edge)*(self.cutter.materialsize-radius/2), self.edge*(self.cutter.materialsize-radius/2)])(cube([radius, i_cutv1, i_cutv2])))
 				cutters.add(cuttings)
 
 		return cutters
